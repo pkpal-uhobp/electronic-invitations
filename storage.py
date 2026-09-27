@@ -1,52 +1,64 @@
-"""JSON storage helpers for the project."""
-
+"""Хранилище объектов проекта в JSON."""
 import json
 from pathlib import Path
-from typing import Any
+from typing import List
 
-from events import Events
-from invitations import Invitations
-
+from models import Event, Invitation
 
 DATA_DIR = Path(__file__).parent / "data"
 EVENTS_FILE = DATA_DIR / "events.json"
 INVITATIONS_FILE = DATA_DIR / "invitations.json"
 
 
-def load_json(path: Path, default: Any) -> Any:
-    """Load JSON data and return a default value when reading fails."""
-    try:
-        with path.open("r", encoding="utf-8") as file:
-            return json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError, OSError):
-        return default.copy()
+def load_events() -> List[Event]:
+    with EVENTS_FILE.open("r", encoding="utf-8") as file:
+        data = json.load(file)
+    return [Event(str(item["id"]), item["name"], item["date"]) for item in data]
 
 
-def save_json(path: Path, data: Any) -> None:
-    """Save data as formatted UTF-8 JSON."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    try:
-        with path.open("w", encoding="utf-8") as file:
-            json.dump(data, file, ensure_ascii=False, indent=2)
-    except OSError as error:
-        raise RuntimeError("Не удалось сохранить данные") from error
+def save_events(events: List[Event]) -> None:
+    DATA_DIR.mkdir(exist_ok=True)
+    with EVENTS_FILE.open("w", encoding="utf-8") as file:
+        json.dump(
+            [{"id": e.id, "name": e.name, "date": e.date} for e in events],
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
 
 
-def load_events() -> Events:
-    """Load events from the project data file."""
-    return load_json(EVENTS_FILE, {})
+def load_invitations(events: List[Event]) -> List[Invitation]:
+    with INVITATIONS_FILE.open("r", encoding="utf-8") as file:
+        data = json.load(file)
+
+    result = []
+    for item in data:
+        event = next((e for e in events if e.id == item["event_id"]), None)
+        if event:
+            invitation = Invitation(
+                str(item["id"]), event, item["guest_name"]
+            )
+            invitation.response = item.get("response", "не знаю")
+            invitation.status = item.get("status", "active")
+            result.append(invitation)
+    return result
 
 
-def save_events(events: Events) -> None:
-    """Save events to the project data file."""
-    save_json(EVENTS_FILE, events)
-
-
-def load_invitations() -> Invitations:
-    """Load invitations from the project data file."""
-    return load_json(INVITATIONS_FILE, [])
-
-
-def save_invitations(invitations: Invitations) -> None:
-    """Save invitations to the project data file."""
-    save_json(INVITATIONS_FILE, invitations)
+def save_invitations(invitations: List[Invitation]) -> None:
+    DATA_DIR.mkdir(exist_ok=True)
+    with INVITATIONS_FILE.open("w", encoding="utf-8") as file:
+        json.dump(
+            [
+                {
+                    "id": i.id,
+                    "event_id": i.event.id,
+                    "guest_name": i.guest_name,
+                    "response": i.response,
+                    "status": i.status,
+                }
+                for i in invitations
+            ],
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )

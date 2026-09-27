@@ -1,54 +1,37 @@
-"""Functions for working with events."""
 
+"""Работа с объектами событий."""
 from datetime import date
-from typing import Iterator
+from models import Event
 
+def add_event(
+    events: list[Event],
+    name: str,
+    event_date: date
+) -> Event:
 
-Events = dict[str, dict[str, str]]
-EventItem = tuple[str, dict[str, str]]
-
-
-def check_event(name: str, event_date: date) -> bool:
-    """Check that an event has a name and is not in the past."""
-    if not name.strip():
-        return False
-    return event_date >= date.today()
-
-
-def add_event(events: Events, name: str, event_date: date) -> str:
-    """Add an event to the collection and return its identifier."""
-    if not check_event(name, event_date):
+    if not name.strip() or event_date < date.today():
         raise ValueError("Некорректные данные события")
 
-    event_id = str(max((int(key) for key in events), default=0) + 1)
-    events[event_id] = {
-        "name": name.strip(),
-        "date": event_date.isoformat(),
-    }
-    return event_id
+    event_id = str(max((int(e.id) for e in events), default=0) + 1)
 
-
-def find_events(events: Events, query: str) -> list[EventItem]:
-    """Find events whose names contain the query string."""
-    normalized_query = query.strip().lower()
-    return [
-        (event_id, event)
-        for event_id, event in events.items()
-        if normalized_query in event["name"].lower()
-    ]
-
-
-def sort_events(events: Events) -> list[EventItem]:
-    """Return events sorted by date and then by name."""
-    return sorted(
-        events.items(),
-        key=lambda item: (item[1]["date"], item[1]["name"].lower()),
+    event = Event(
+        event_id,
+        name.strip(),
+        event_date.isoformat()
     )
 
+    events.append(event)
 
-def iter_upcoming_events(events: Events) -> Iterator[EventItem]:
-    """Yield events whose date is today or later."""
-    today = date.today().isoformat()
-    for event_id, event in sort_events(events):
-        if event["date"] >= today:
-            yield event_id, event
+    return event
+
+def find_events(events: list[Event], query: str) -> list[Event]:
+    return [e for e in events if query.lower() in e.name.lower()]
+
+def sort_events(events: list[Event]) -> list[Event]:
+    return sorted(events, key=lambda e: (e.date, e.name.lower()))
+
+def iter_upcoming_events(events: list[Event]):
+    today=date.today().isoformat()
+    for e in sort_events(events):
+        if e.date >= today:
+            yield e
