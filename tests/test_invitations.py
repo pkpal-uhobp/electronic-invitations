@@ -29,7 +29,6 @@ def test_cancel_invitation_allows_new_invitation() -> None:
 def test_set_response_and_statistics() -> None:
     invitations: list[dict[str, str]] = []
     invitation = add_invitation(invitations, "1", "Иван")
-
     assert set_response(invitations, invitation["id"], "да")
     statistics = invitation_statistics(invitations)
 

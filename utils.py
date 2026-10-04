@@ -1,10 +1,10 @@
-"""Input helpers with exception handling."""
+"""Вспомогательные функции безопасного консольного ввода."""
 
 from datetime import date
 
 
 def input_int(prompt: str, minimum: int | None = None) -> int:
-    """Read an integer and repeat the prompt after invalid input."""
+    """Считать целое число и повторять запрос после неверного ввода."""
     while True:
         try:
             value = int(input(prompt))
@@ -16,7 +16,7 @@ def input_int(prompt: str, minimum: int | None = None) -> int:
 
 
 def input_date(prompt: str) -> date:
-    """Read a date in YYYY-MM-DD format."""
+    """Считать дату в формате YYYY-MM-DD."""
     while True:
         raw_value = input(prompt).strip()
         try:

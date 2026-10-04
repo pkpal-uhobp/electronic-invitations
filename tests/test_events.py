@@ -15,7 +15,6 @@ def test_add_event_and_find_event() -> None:
 
     event_id = add_event(events, "День рождения", future_date)
     result = find_events(events, "рожд")
-
     assert event_id == "1"
     assert result[0][1]["name"] == "День рождения"
 
@@ -27,13 +26,11 @@ def test_sort_events_by_date() -> None:
     }
 
     result = sort_events(events)
-
     assert [item[0] for item in result] == ["2", "1"]
 
 
 def test_add_event_rejects_past_date() -> None:
     events: dict[str, dict[str, str]] = {}
     past_date = date.today() - timedelta(days=1)
-
     with pytest.raises(ValueError):
         add_event(events, "Старое событие", past_date)
