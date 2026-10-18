@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">СПИСОК ПРИГЛАШЁННЫХ</span><h1>Гости</h1><p class="muted">Участники мероприятий и получатели приглашений.</p></div><span class="count-chip">Всего: {{ guests|length }}</span></div>
+<div class="cards-grid">
+{% for guest in guests %}
+<article class="entry-card"><span class="tag tag-purple">Гость №{{ guest.id }}</span><h2>{{ guest.name|default:'Без имени' }}</h2><p class="muted">{{ guest.email }}</p><a class="card-link" href="{% url 'guests:detail' guest.id %}">Приглашения гостя →</a></article>
+{% empty %}<div class="empty-state">Гостей пока нет.</div>{% endfor %}
+</div>
+{% endblock %}

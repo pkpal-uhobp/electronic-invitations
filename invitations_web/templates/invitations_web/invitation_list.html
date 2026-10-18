@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">СПИСОК ГОСТЕЙ</span><h1>Приглашения</h1><p class="muted">Все отправленные приглашения и их статусы.</p></div><span class="count-chip">Всего: {{ invitations|length }}</span></div>
+<div class="cards-grid">
+{% for invitation in invitations %}
+  {% include 'invitations_web/includes/invitation_card.html' %}
+{% empty %}
+  <div class="empty-state">Приглашения пока отсутствуют.</div>
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% load static %}
+<header class="site-header">
+  <div class="container navigation-inner">
+    <a class="brand" href="{% url 'homepage:index' %}">
+      <img src="{% static 'homepage/img/logo.png' %}" class="brand-logo" alt="Значок проекта" width="43" height="43">
+      <span>Приглас<span class="brand-accent">и</span></span>
+    </a>
+    <button id="nav-toggle" class="nav-toggle" type="button" aria-label="Открыть меню" aria-controls="site-nav" aria-expanded="false">☰</button>
+    <nav id="site-nav" class="site-nav" aria-label="Основная навигация">
+      <a href="{% url 'homepage:index' %}" {% if request.resolver_match.namespace == 'homepage' %}aria-current="page"{% endif %}>Главная</a>
+      <a href="{% url 'events:list' %}" {% if request.resolver_match.namespace == 'events' %}aria-current="page"{% endif %}>События</a>
+      <a href="{% url 'invitations:list' %}" {% if request.resolver_match.namespace == 'invitations' %}aria-current="page"{% endif %}>Приглашения</a>
+      <a href="{% url 'users:list' %}" {% if request.resolver_match.namespace == 'users' %}aria-current="page"{% endif %}>Организаторы</a>
+      <a href="{% url 'guests:list' %}" {% if request.resolver_match.namespace == 'guests' %}aria-current="page"{% endif %}>Гости</a>
+    </nav>
+  </div>
+</header>

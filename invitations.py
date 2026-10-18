@@ -1,199 +1,87 @@
-"""Работа с электронными приглашениями."""
-
+"""Создание и обработка электронных приглашений (совместимо с ПР3)."""
 from models import Event, Guest, Invitation
-
 VALID_RESPONSES = {"да", "нет", "не знаю"}
 
+def _next_id(invitations):
+    ids = [str(i['id'] if isinstance(i, dict) else i.id) for i in invitations]
+    return str(max((int(i) for i in ids), default=0) + 1)
 
-def _next_id(invitations) -> str:
-    """Вернуть следующий идентификатор приглашения."""
-    ids = []
-    for invitation in invitations:
-        if isinstance(invitation, dict):
-            ids.append(str(invitation["id"]))
-        else:
-            ids.append(str(invitation.id))
-    return str(max((int(value) for value in ids), default=0) + 1)
+def _guest_name(guest):
+    return guest.name if isinstance(guest, Guest) else str(guest)
 
-
-def _guest_name(guest) -> str:
-    """Вернуть имя гостя для строки, Guest или объекта Invitation."""
-    if isinstance(guest, Guest):
-        return guest.name
-    return str(guest)
-
-
-def is_invitation_available(invitations, event_id, guest) -> bool:
-    """Проверить, можно ли создать активное приглашение этому гостю."""
-    target_event_id = str(getattr(event_id, "id", event_id))
-    target_guest = _guest_name(guest).strip().lower()
-
-    for invitation in invitations:
-        if isinstance(invitation, dict):
-            current_event_id = str(invitation["event_id"])
-            current_guest = invitation["guest_name"].strip().lower()
-            status = invitation.get("status", "active")
-        else:
-            current_event_id = str(invitation.event.id)
-            current_guest = invitation.guest_name.strip().lower()
-            status = invitation.status
-
-        if (
-            current_event_id == target_event_id
-            and current_guest == target_guest
-            and status == "active"
-        ):
+def is_invitation_available(invitations, event_id, guest):
+    event_id = str(getattr(event_id, 'id', event_id))
+    guest_name = _guest_name(guest).strip().lower()
+    for item in invitations:
+        eid = str(item['event_id']) if isinstance(item, dict) else str(item.event.id)
+        current_guest = item['guest_name'] if isinstance(item, dict) else item.guest_name
+        status = item.get('status', 'active') if isinstance(item, dict) else item.status
+        if eid == event_id and current_guest.strip().lower() == guest_name and status == 'active':
             return False
     return True
 
-
 def add_invitation(invitations, event, guest):
-    """Создать приглашение в формате ПР2 или объектном формате ПР3/ПР5."""
     guest_name = _guest_name(guest).strip()
     if not guest_name:
-        raise ValueError("Имя гостя не может быть пустым")
+        raise ValueError('Имя гостя не может быть пустым')
     if not is_invitation_available(invitations, event, guest):
-        raise ValueError("Активное приглашение для гостя уже существует")
-
-    invitation_id = _next_id(invitations)
+        raise ValueError('Активное приглашение для гостя уже существует')
+    ident = _next_id(invitations)
     if isinstance(event, Event):
-        invitation = Invitation(invitation_id, event, guest)
+        item = Invitation(ident, event, guest)
     else:
-        invitation = {
-            "id": invitation_id,
-            "event_id": str(event),
-            "guest_name": guest_name,
-            "response": "не знаю",
-            "status": "active",
-        }
+        item = {'id': ident, 'event_id': str(event), 'guest_name': guest_name, 'response': 'не знаю', 'status': 'active'}
+    invitations.append(item)
+    return item
 
-    invitations.append(invitation)
-    return invitation
-
-
-def cancel_invitation(invitations, invitation_id: str) -> bool:
-    """Отменить приглашение по идентификатору."""
-    target = str(invitation_id)
-    for invitation in invitations:
-        current_id = str(
-            invitation["id"] if isinstance(invitation, dict) else invitation.id
-        )
-        if current_id != target:
-            continue
-        if isinstance(invitation, dict):
-            invitation["status"] = "cancelled"
-        else:
-            invitation.cancel()
-        return True
+def cancel_invitation(invitations, invitation_id):
+    for item in invitations:
+        if str(item['id'] if isinstance(item, dict) else item.id) == str(invitation_id):
+            if isinstance(item, dict):
+                item['status'] = 'cancelled'
+            else:
+                item.cancel()
+            return True
     return False
 
-
-def set_response(invitations, invitation_id: str, response: str) -> bool:
-    """Сохранить ответ гостя на приглашение."""
+def set_response(invitations, invitation_id, response):
     if response not in VALID_RESPONSES:
-        raise ValueError("Допустимые ответы: да, нет, не знаю")
-
-    target = str(invitation_id)
-    for invitation in invitations:
-        current_id = str(
-            invitation["id"] if isinstance(invitation, dict) else invitation.id
-        )
-        if current_id != target:
-            continue
-        if isinstance(invitation, dict):
-            invitation["response"] = response
-        else:
-            invitation.set_response(response)
-        return True
+        raise ValueError('Допустимые ответы: да, нет, не знаю')
+    for item in invitations:
+        if str(item['id'] if isinstance(item, dict) else item.id) == str(invitation_id):
+            if isinstance(item, dict):
+                item['response'] = response
+            else:
+                item.set_response(response)
+            return True
     return False
-
 
 def sort_invitations(invitations):
-    """Отсортировать приглашения по имени гостя и идентификатору."""
-
-    def key(invitation):
-        if isinstance(invitation, dict):
-            return (
-                invitation["guest_name"].lower(),
-                int(invitation["id"]),
-            )
-        return invitation.guest_name.lower(), int(invitation.id)
-
+    def key(i):
+        return ((i['guest_name'] if isinstance(i, dict) else i.guest_name).lower(),
+                int(i['id'] if isinstance(i, dict) else i.id))
     return sorted(invitations, key=key)
 
+def find_invitations(invitations, query):
+    return [i for i in invitations if query.lower() in
+            (i['guest_name'] if isinstance(i, dict) else i.guest_name).lower()]
 
-def find_invitations(invitations, query: str):
-    """Найти приглашения по имени гостя."""
-    query = query.lower()
-    result = []
-    for invitation in invitations:
-        guest_name = (
-            invitation["guest_name"]
-            if isinstance(invitation, dict)
-            else invitation.guest_name
-        )
-        if query in guest_name.lower():
-            result.append(invitation)
-    return result
-
-
-def find_invitation_by_id(
-    invitations: list[Invitation], invitation_id: int | str
-) -> Invitation | None:
-    """Найти объект Invitation по идентификатору для динамического URL."""
-    target = str(invitation_id)
-    for invitation in invitations:
-        if invitation.id == target:
-            return invitation
-    return None
-
+def find_invitation_by_id(invitations, invitation_id):
+    return next((i for i in invitations if i.id == str(invitation_id)), None)
 
 def create_invitation(event_name, guest_name, event_date):
-    """Сформировать текст приглашения."""
-    return (
-        f"Здравствуйте, {guest_name}!\n"
-        f"Приглашаем вас на событие «{event_name}».\n"
-        f"Дата проведения: {event_date}."
-    )
-
+    return (f'Здравствуйте, {guest_name}!\nПриглашаем вас на событие «{event_name}».\n'
+            f'Дата проведения: {event_date}.')
 
 def process_response(response):
-    """Вернуть человекочитаемое описание ответа гостя."""
-    return {
-        "да": "Гость подтвердил участие.",
-        "нет": "Гость отказался от участия.",
-    }.get(response, "Ответ гостя пока не определён.")
-
+    return {'да': 'Гость подтвердил участие.', 'нет': 'Гость отказался от участия.'}.get(
+        response, 'Ответ гостя пока не определён.')
 
 def invitation_statistics(invitations):
-    """Посчитать основные показатели по приглашениям."""
-    statistics = {
-        "total": len(invitations),
-        "active": 0,
-        "cancelled": 0,
-        "yes": 0,
-        "no": 0,
-        "unknown": 0,
-    }
-
-    for invitation in invitations:
-        if isinstance(invitation, dict):
-            status = invitation.get("status", "active")
-            response = invitation.get("response", "не знаю")
-        else:
-            status = invitation.status
-            response = invitation.response
-
-        if status == "active":
-            statistics["active"] += 1
-        else:
-            statistics["cancelled"] += 1
-
-        if response == "да":
-            statistics["yes"] += 1
-        elif response == "нет":
-            statistics["no"] += 1
-        else:
-            statistics["unknown"] += 1
-
-    return statistics
+    stats={'total':len(invitations),'active':0,'cancelled':0,'yes':0,'no':0,'unknown':0}
+    for i in invitations:
+        status = i.get('status','active') if isinstance(i,dict) else i.status
+        response = i.get('response','не знаю') if isinstance(i,dict) else i.response
+        stats['active' if status == 'active' else 'cancelled'] += 1
+        stats[{'да':'yes','нет':'no'}.get(response, 'unknown')] += 1
+    return stats

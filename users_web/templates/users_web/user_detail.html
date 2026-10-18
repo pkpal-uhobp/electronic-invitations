@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<a class="back-link" href="{% url 'users:list' %}">← Организаторы</a>
+<article class="detail-card"><span class="eyebrow">ОРГАНИЗАТОР №{{ user.id }}</span><h1>{{ user.name }}</h1><p class="muted">{{ user.email }}</p></article>
+<h2 class="section-title">События организатора ({{ events|length }})</h2>
+<div class="cards-grid">{% for event in events %}{% include 'events_web/includes/event_card.html' %}{% empty %}<div class="empty-state">Событий пока нет.</div>{% endfor %}</div>
+{% endblock %}

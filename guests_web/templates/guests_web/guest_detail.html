@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<a class="back-link" href="{% url 'guests:list' %}">← Гости</a>
+<article class="detail-card"><span class="eyebrow">ГОСТЬ №{{ guest.id }}</span><h1>{{ guest.name }}</h1><p class="muted">{{ guest.email }}</p></article>
+<h2 class="section-title">Приглашения гостя ({{ invitations|length }})</h2>
+<div class="cards-grid">{% for invitation in invitations %}{% include 'invitations_web/includes/invitation_card.html' %}{% empty %}<div class="empty-state">Приглашений пока нет.</div>{% endfor %}</div>
+{% endblock %}

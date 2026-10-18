@@ -1,8 +1,4 @@
-"""ASGI-конфигурация проекта."""
-
 import os
-
 from django.core.asgi import get_asgi_application
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "inviteweb.settings")
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inviteweb.settings')
 application = get_asgi_application()

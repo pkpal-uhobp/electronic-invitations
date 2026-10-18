@@ -1,198 +1,116 @@
-# Электронные приглашения — ПР5 Django
+# Электронные приглашения — ПР6: шаблоны Django
 
-Учебный индивидуальный проект по дисциплине «Технологии разработки приложений
-на базе фреймворков». Консольная версия ПР3 сохранена и дополнена базовым
-веб-интерфейсом на Django 5.2.
+Продолжение учебного проекта [pkpal-uhobp/electronic-invitations](https://github.com/pkpal-uhobp/electronic-invitations) после ПР5.
 
 ## Назначение
 
-Приложение предназначено для ведения пользователей-организаторов, гостей,
-событий и электронных приглашений, а также для хранения ответов гостей. На
-этапе ПР5 данные по-прежнему хранятся в JSON, а Django добавляет веб-слой:
-URL, view-функции и HTML-страницы.
+Система позволяет просматривать события, организаторов, гостей и электронные приглашения, а также их статусы и ответы. Предметная область осталась прежней:
 
-## Используемые технологии
+- `User` — организатор; один организатор может создавать несколько `Event`;
+- `Guest` — гость; один гость может иметь несколько `Invitation`;
+- `Event` — событие; к одному событию относится несколько приглашений;
+- `Invitation` — приглашение гостя на событие, статус `active/cancelled` и ответ `да/нет/не знаю`.
 
-- Python 3;
-- Django 5.2;
-- HTML;
-- CSS и Bootstrap 5.3;
-- JSON;
-- pytest;
-- flake8.
+**Хранилище:** `data/*.json`. В ПР6 по-прежнему **не используются Django ORM и предметные модели базы**. SQLite применяется только для штатных механизмов Django (сессии, админка). Консольная версия запускается отдельно (`python main.py`). Веб-формы создания записей пока не реализованы.
 
-## Предметная область
+## Возможности ПР6
 
-Основные сущности проекта:
+- Шаблон `templates/base.html` с наследованием через `extends`, `block`.
+- Общая навигация в `templates/includes/navigation.html` (через `include`).
+- Отдельные шаблоны списков и подробных страниц всех четырёх сущностей.
+- Общие карточки событий и приглашений через `include`.
+- View-функции только загружают данные и используют `render(request, template, context)`.
+- `for`, `empty`, `if`, фильтры `length`, `default`, `date` в шаблонах.
+- Именованные пути и пространства имён (`homepage`, `events`, `invitations`, `users`, `guests`).
+- Свой CSS, JavaScript (текущий год, меню на телефоне), PNG-логотип; подключение через `{% static %}`.
+- 404 для отсутствующих идентификаторов и сохранение JSON-формата ПР5.
+- Автотесты доменной логики и веб-маршрутов.
 
-- `User` — пользователь-организатор: `id`, `name`, `email`;
-- `Guest` — гость: `id`, `name`, `email`;
-- `Event` — событие: `id`, `name`, `date`, ссылка на `User`;
-- `Invitation` — приглашение: `id`, ссылка на `Event`, ссылка на `Guest`,
-  `status` и `response`.
+## Установка и запуск (Windows PowerShell)
 
-Связи предметной области:
+Откройте терминал в корне `electronic-invitations-PR6` (там, где `manage.py`):
 
-```text
-User 1 ─── * Event 1 ─── * Invitation * ─── 1 Guest
-```
-
-То есть один пользователь может организовать несколько событий, а каждый
-объект `Invitation` связывает конкретное событие с конкретным гостем.
-
-`User` в этом проекте является предметной сущностью организатора. На ПР5 он не
-заменяется Django ORM-моделью и не используется для аутентификации. Переход на
-ORM и систему входа относится к следующим этапам.
-
-## Страницы веб-интерфейса
-
-- `/` — главная страница;
-- `/events/` — список событий;
-- `/events/<int:event_id>/` — карточка события и его организатор;
-- `/invitations/` — список приглашений;
-- `/invitations/<int:invitation_id>/` — карточка приглашения;
-- `/users/` — список пользователей-организаторов;
-- `/users/<int:user_id>/` — пользователь и созданные им события;
-- `/guests/` — список гостей;
-- `/guests/<int:guest_id>/` — гость и его приглашения.
-
-Для несуществующих идентификаторов страницы деталей возвращают HTTP 404.
-Например: `/events/999/`, `/invitations/999/`, `/users/999/`, `/guests/999/`.
-
-## Веб-слой ПР5
-
-В проекте созданы пять Django-приложений:
-
-- `homepage` — главная страница и единый HTML-каркас;
-- `events_web` — страницы событий;
-- `invitations_web` — страницы приглашений;
-- `users_web` — страницы пользователей;
-- `guests_web` — страницы гостей.
-
-Названия `*_web` отделяют Django-приложения от модулей предметной логики.
-HTML на этом этапе формируется во view-функциях. Bootstrap 5.3 подключён через
-CDN.
-
-## Хранение данных
-
-Данные находятся в файлах:
-
-- `data/users.json`;
-- `data/guests.json`;
-- `data/events.json`;
-- `data/invitations.json`.
-
-`storage.py` преобразует JSON в объекты предметной области и обратно. Связи
-восстанавливаются по идентификаторам:
-
-- `events.json -> user_id -> User`;
-- `invitations.json -> event_id -> Event`;
-- `invitations.json -> guest_id -> Guest`.
-
-Поле `guest_name` в `invitations.json` оставлено для совместимости со старым
-форматом ПР3, но основная связь приглашения теперь строится через `guest_id`.
-
-## Структура проекта
-
-```text
-electronic-invitations/
-├── manage.py
-├── README.md
-├── requirements.txt
-├── main.py
-├── events.py
-├── invitations.py
-├── users.py
-├── guests.py
-├── storage.py
-├── utils.py
-├── inviteweb/
-├── homepage/
-├── events_web/
-├── invitations_web/
-├── users_web/
-├── guests_web/
-├── models/
-│   ├── events.py
-│   ├── invitations.py
-│   ├── users.py
-│   └── guests.py
-├── data/
-│   ├── events.json
-│   ├── invitations.json
-│   ├── users.json
-│   └── guests.json
-└── tests/
-```
-
-## Установка
-
-```bash
-python -m venv .venv
-```
-
-Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-Linux/macOS:
-
-```bash
-source .venv/bin/activate
-```
-
-Установить зависимости:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Запуск Django-приложения
-
-```bash
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 python manage.py migrate
 python manage.py check
 python manage.py runserver
 ```
 
-После запуска открыть `http://127.0.0.1:8000/`.
+Если PowerShell запрещает активацию, вместо неё можно выполнять команды через `.venv\Scripts\python.exe` непосредственно.
 
-## Консольная версия
+Linux/macOS: `python3 -m venv .venv`, затем `source .venv/bin/activate`.
 
-```bash
-python main.py
+Откройте сайт: http://127.0.0.1:8000/
+
+## URL веб-части
+
+| Адрес | Содержание |
+| --- | --- |
+| `/` | главная и статистика |
+| `/events/` | события |
+| `/events/1/` | отдельное событие |
+| `/invitations/` | приглашения |
+| `/invitations/1/` | отдельное приглашение |
+| `/users/` | организаторы |
+| `/users/1/` | отдельный организатор и события |
+| `/guests/` | гости |
+| `/guests/1/` | отдельный гость и приглашения |
+
+Для несуществующих ID возвращается HTTP 404.
+
+## Проверки
+
+```powershell
+python manage.py check
+python manage.py test
+pytest -q
 ```
 
-Консольная версия также использует сущности `User` и `Guest`: пользователь
-связан с событием, а приглашение создаётся для выбранного объекта `Guest`.
+`python manage.py test` — штатные тесты Django (набор pytest находится в `tests/`; поэтому проверку проекта выполняйте **`pytest -q`**).
 
-## Тесты и качество кода
+## Структура
 
-```bash
-pytest -v
-flake8 . --extend-exclude=.venv,venv
+```text
+electronic-invitations-PR6/
+├── manage.py, main.py, events.py, invitations.py, users.py, guests.py
+├── storage.py, utils.py, requirements.txt, README.md
+├── models/                  # собственные классы Python (не ORM)
+├── data/                    # events.json, invitations.json, users.json, guests.json
+├── inviteweb/               # settings, urls, wsgi, asgi
+├── templates/
+│   ├── base.html
+│   └── includes/navigation.html
+├── homepage/
+│   ├── templates/homepage/index.html
+│   └── static/homepage/{css,js,img}/
+├── events_web/templates/events_web/
+│   ├── event_list.html, event_detail.html
+│   └── includes/event_card.html
+├── invitations_web/templates/invitations_web/
+│   ├── invitation_list.html, invitation_detail.html
+│   └── includes/{invitation_card,invitation_status}.html
+├── users_web/templates/users_web/{user_list,user_detail}.html
+├── guests_web/templates/guests_web/{guest_list,guest_detail}.html
+└── tests/
 ```
 
-Сохранена совместимость со старыми тестами, которые проверяют часть функций
-ПР2/ПР3 в словарном формате.
+## Важно для сдачи
 
-## Текущее состояние ПР5
+Практическая №6 — **продолжение того же репозитория**, не новый репозиторий. Для сдачи перенесите изменения в исходный `electronic-invitations` и создайте коммит с префиксом `PR6:`. Этот ZIP — рабочая копия файлов без директории `.git`, сам по себе коммит в GitHub не создаёт.
 
-Реализованы:
+```bash
+git add .
+git commit -m "PR6: transition to Django templates"
+git push
+```
 
-- сущности `User`, `Guest`, `Event`, `Invitation`;
-- связи `User -> Event` и `Guest -> Invitation`;
-- JSON-хранилища всех четырёх сущностей;
-- Django-проект и пять приложений;
-- двухуровневая маршрутизация URL;
-- страницы списков и деталей всех основных сущностей;
-- динамические URL и HTTP 404;
-- навигация между связанными объектами;
-- HTML, CSS и Bootstrap 5.3;
-- сохранение консольной версии приложения.
+### Отличия от ПР5
 
-На следующих этапах планируются Django ORM, база данных предметной области,
-шаблоны, формы, регистрация/авторизация и создание/редактирование данных через
-веб-интерфейс.
+В ПР5 HTML генерировался через `HttpResponse(page(...))`, в ПР6 все пять приложений используют Django Template Language. Функция `page()` удалена из веб-слоя; JSON-хранилище и консольная часть сохранены.
+
+## Критерии и результаты
+
+Проверяйте пункты чек-листа ПР6 из методички: корректность маршрутов, открытие списков и деталей, пустые списки, 404, `extends`, `include`, `block`, `static`, README, Git и демонстрация проекта.

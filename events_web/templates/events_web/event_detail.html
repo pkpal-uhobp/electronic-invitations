@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<a class="back-link" href="{% url 'events:list' %}">← Все события</a>
+<article class="detail-card">
+  <div class="detail-top"><span class="eyebrow">СОБЫТИЕ №{{ event.id }}</span>
+  {% if is_upcoming %}<span class="status-pill status-active">Предстоит</span>{% else %}<span class="status-pill status-muted">Завершено</span>{% endif %}</div>
+  <h1>{{ event.name }}</h1>
+  <div class="detail-table">
+    <div><span>Дата</span><strong>{{ event_date|date:'d.m.Y' }}</strong></div>
+    <div><span>Организатор</span><strong>{% if event.user %}<a href="{% url 'users:detail' event.user.id %}">{{ event.user.name }}</a>{% else %}Не указан{% endif %}</strong></div>
+    <div><span>Идентификатор</span><strong>№{{ event.id }}</strong></div>
+  </div>
+  <a class="action action-outline" href="{% url 'invitations:list' %}">Посмотреть приглашения →</a>
+</article>
+{% endblock %}

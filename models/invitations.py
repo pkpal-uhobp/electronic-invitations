@@ -1,12 +1,8 @@
-"""Класс электронного приглашения предметной области ПР3."""
-
+"""Приглашение (предметная модель)."""
 from .guests import Guest
 
-
 class Invitation:
-    """Приглашение конкретного гостя на конкретное событие."""
-
-    def __init__(self, invitation_id: str, event, guest) -> None:
+    def __init__(self, invitation_id: str, event, guest):
         self.id = str(invitation_id)
         self.event = event
         self.guest = guest
@@ -14,19 +10,14 @@ class Invitation:
         self.status = "active"
 
     @property
-    def guest_name(self) -> str:
-        """Имя гостя; свойство сохраняет совместимость со старым кодом ПР3."""
-        if isinstance(self.guest, Guest):
-            return self.guest.name
-        return str(self.guest)
+    def guest_name(self):
+        return self.guest.name if isinstance(self.guest, Guest) else str(self.guest)
 
-    def cancel(self) -> None:
-        """Отменить приглашение."""
+    def cancel(self):
         self.status = "cancelled"
 
-    def set_response(self, response: str) -> None:
-        """Сохранить ответ гостя."""
+    def set_response(self, response):
         self.response = response
 
-    def __str__(self) -> str:
+    def __str__(self):
         return f"#{self.id}: {self.guest_name} - {self.status}"

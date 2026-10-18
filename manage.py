@@ -1,21 +1,15 @@
 #!/usr/bin/env python
-"""Командная утилита Django для проекта электронных приглашений."""
-
+"""Django management script."""
 import os
 import sys
 
-
-def main() -> None:
-    """Выполнить административную команду Django."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "inviteweb.settings")
+def main():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inviteweb.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
-        raise ImportError(
-            "Django не установлен. Выполните: pip install -r requirements.txt"
-        ) from exc
+        raise ImportError('Сначала установите зависимости: pip install -r requirements.txt') from exc
     execute_from_command_line(sys.argv)
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<a class="back-link" href="{% url 'invitations:list' %}">← Все приглашения</a>
+<article class="detail-card">
+  <div class="detail-top"><span class="eyebrow">ЭЛЕКТРОННОЕ ПРИГЛАШЕНИЕ №{{ invitation.id }}</span>{% include 'invitations_web/includes/invitation_status.html' %}</div>
+  <h1>Для {{ invitation.guest_name }}</h1>
+  <p class="lead muted">Приглашаем вас на событие «{{ invitation.event.name }}».</p>
+  <div class="detail-table">
+    <div><span>Событие</span><strong><a href="{% url 'events:detail' invitation.event.id %}">{{ invitation.event.name }}</a></strong></div>
+    <div><span>Дата</span><strong>{{ event_date|date:'d.m.Y' }}</strong></div>
+    <div><span>Гость</span><strong>{% if invitation.guest.email %}<a href="{% url 'guests:detail' invitation.guest.id %}">{{ invitation.guest_name }}</a>{% else %}{{ invitation.guest_name }}{% endif %}</strong></div>
+    {% if invitation.guest.email %}<div><span>Email</span><strong>{{ invitation.guest.email }}</strong></div>{% endif %}
+    <div><span>Ответ</span><strong>
+      {% if invitation.response == 'да' %}<span class="response-positive">Придёт</span>
+      {% elif invitation.response == 'нет' %}<span class="response-negative">Не придёт</span>
+      {% else %}Не определено{% endif %}
+    </strong></div>
+  </div>
+</article>
+{% endblock %}

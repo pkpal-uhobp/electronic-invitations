@@ -1,0 +1,5 @@
+{% if invitation.status == 'cancelled' %}
+  <span class="status-pill status-muted invitation-status invitation-status-cancelled">Отменено</span>
+{% else %}
+  <span class="status-pill status-active invitation-status invitation-status-active">Активно</span>
+{% endif %}

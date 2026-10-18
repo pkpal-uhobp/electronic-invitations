@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">КАЛЕНДАРЬ СОБЫТИЙ</span><h1>События</h1><p class="muted">Просматривайте запланированные мероприятия и организаторов.</p></div><span class="count-chip">Всего: {{ events|length }}</span></div>
+<div class="cards-grid">
+{% for event in events %}
+  {% include 'events_web/includes/event_card.html' %}
+{% empty %}
+  <div class="empty-state">Пока нет событий. Данные можно добавить в <code>data/events.json</code>.</div>
+{% endfor %}
+</div>
+{% endblock %}

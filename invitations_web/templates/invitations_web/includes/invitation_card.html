@@ -1,0 +1,6 @@
+<article class="entry-card invitation-card">
+  <div class="card-top"><span class="tag">Приглашение №{{ invitation.id }}</span>{% include 'invitations_web/includes/invitation_status.html' %}</div>
+  <h2>{{ invitation.guest_name|default:'Без имени' }}</h2>
+  <p class="muted">На событие: <a href="{% url 'events:detail' invitation.event.id %}">{{ invitation.event.name }}</a></p>
+  <a class="card-link" href="{% url 'invitations:detail' invitation.id %}">Открыть приглашение <span aria-hidden="true">→</span></a>
+</article>

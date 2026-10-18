@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Главная — Электронные приглашения{% endblock %}
+{% block content %}
+<section class="hero">
+  <span class="eyebrow">УЧЕБНЫЙ DJANGO-ПРОЕКТ · ПРАКТИЧЕСКАЯ РАБОТА №6</span>
+  <h1>Ваши события.<br><em>Ваши приглашения.</em></h1>
+  <p class="hero-description">Организуйте события, просматривайте приглашения и отслеживайте ответы гостей. Всё в одном удобном пространстве.</p>
+  <div class="hero-actions">
+    <a class="action action-primary" href="{% url 'events:list' %}">Посмотреть события <span aria-hidden="true">↗</span></a>
+    <a class="action action-outline" href="{% url 'invitations:list' %}">Все приглашения</a>
+  </div>
+</section>
+<section aria-label="Сводка проекта" class="stats-grid">
+  <a class="stat-card" href="{% url 'events:list' %}"><span class="stat-number">{{ stats.events }}</span><span class="stat-label">События</span></a>
+  <a class="stat-card" href="{% url 'invitations:list' %}"><span class="stat-number">{{ stats.invitations }}</span><span class="stat-label">Приглашения</span></a>
+  <a class="stat-card" href="{% url 'users:list' %}"><span class="stat-number">{{ stats.users }}</span><span class="stat-label">Организаторы</span></a>
+  <a class="stat-card" href="{% url 'guests:list' %}"><span class="stat-number">{{ stats.guests }}</span><span class="stat-label">Гости</span></a>
+</section>
+<section class="info-panel">
+  <div><h2>Как это устроено</h2><p>Данные проекта хранятся в JSON-файлах. Django загружает объекты, передаёт их в шаблоны через <code>context</code>, а шаблоны формируют HTML.</p></div>
+  <span class="info-icon" aria-hidden="true">✉</span>
+</section>
+{% endblock %}

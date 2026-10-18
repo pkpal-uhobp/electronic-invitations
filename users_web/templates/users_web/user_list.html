@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">КОМАНДА ПРОЕКТА</span><h1>Организаторы</h1><p class="muted">Люди, создающие события и приглашающие гостей.</p></div><span class="count-chip">Всего: {{ users|length }}</span></div>
+<div class="cards-grid">
+{% for organizer in users %}
+<article class="entry-card"><span class="tag tag-purple">Организатор №{{ organizer.id }}</span><h2>{{ organizer.name|default:'Без имени' }}</h2><p class="muted">{{ organizer.email }}</p><a class="card-link" href="{% url 'users:detail' organizer.id %}">Профиль и события →</a></article>
+{% empty %}<div class="empty-state">Организаторы пока отсутствуют.</div>{% endfor %}
+</div>
+{% endblock %}
