@@ -1,17 +1,11 @@
-"""В ПР6 HTML целиком формируется Django-шаблонами."""
+"""ПР7: сводка из отдельной SQLite-базы, отображаемая шаблоном ПР6."""
 from django.shortcuts import render
-from storage import load_events, load_guests, load_invitations, load_users
+from db import queries
 
 
 def index(request):
-    users = load_users()
-    guests = load_guests()
-    events = load_events(users)
-    invitations = load_invitations(events, guests)
+    totals = queries.one('total_counts')
     return render(request, 'homepage/index.html', {
         'page_title': 'Главная',
-        'stats': {
-            'events': len(events), 'invitations': len(invitations),
-            'guests': len(guests), 'users': len(users),
-        },
+        'stats': {key: totals[key] for key in ('events', 'invitations', 'users', 'guests')},
     })

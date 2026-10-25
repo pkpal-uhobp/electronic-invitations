@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}400 — Некорректный запрос{% endblock %}
+{% block content %}
+{% include 'errors/error_panel.html' with code='400' heading='Некорректный запрос' detail='Не удалось обработать запрос. Проверьте адрес и попробуйте снова.' only %}
+{% endblock %}

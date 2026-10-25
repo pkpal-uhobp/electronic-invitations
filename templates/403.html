@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}403 — Доступ запрещён{% endblock %}
+{% block content %}
+{% include 'errors/error_panel.html' with code='403' heading='Доступ запрещён' detail='У вас нет разрешения на просмотр этой страницы.' only %}
+{% endblock %}

@@ -3,10 +3,8 @@ import os
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-electronic-invitations-local-development-only')
-DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver'] if DEBUG else [
-    host for host in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if host
-]
+DEBUG = False
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
 INSTALLED_APPS = [
     'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
     'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',

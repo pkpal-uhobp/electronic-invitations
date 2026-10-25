@@ -1,4 +1,4 @@
-"""Пути приложения с пространствами имён для Django {% url %}."""
+"""Именованные маршруты и обработчики ошибок, доступные при DEBUG=False."""
 from django.contrib import admin
 from django.urls import include, path
 
@@ -10,3 +10,8 @@ urlpatterns = [
     path('users/', include('users_web.urls')),
     path('guests/', include('guests_web.urls')),
 ]
+
+handler400 = 'inviteweb.error_views.bad_request'
+handler403 = 'inviteweb.error_views.permission_denied'
+handler404 = 'inviteweb.error_views.page_not_found'
+handler500 = 'inviteweb.error_views.server_error'

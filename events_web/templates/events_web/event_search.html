@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Поиск событий по дате — Электронные приглашения{% endblock %}
+{% block content %}
+<a class="back-link" href="{% url 'events:list' %}">← Все события</a>
+<div class="page-heading"><div><span class="eyebrow">ПР7 · SQL WHERE</span><h1>События по дате</h1><p class="muted">Найдите мероприятия, которые состоятся в выбранный день.</p></div></div>
+<form method="get" action="{% url 'events:search' %}" class="filter-panel">
+  <label for="event-date">Дата события</label>
+  <input type="date" id="event-date" name="date" value="{{ selected_date }}" required>
+  <button class="action action-primary" type="submit">Найти события</button>
+</form>
+{% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+{% if has_searched %}
+<h2 class="section-title">Найдено событий: {{ events|length }}</h2>
+<div class="cards-grid">
+{% for event in events %}
+  {% include 'events_web/includes/event_card.html' %}
+{% empty %}
+  <div class="empty-state">На эту дату событий нет.</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

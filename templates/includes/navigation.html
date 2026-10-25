@@ -12,6 +12,9 @@
       <a href="{% url 'invitations:list' %}" {% if request.resolver_match.namespace == 'invitations' %}aria-current="page"{% endif %}>Приглашения</a>
       <a href="{% url 'users:list' %}" {% if request.resolver_match.namespace == 'users' %}aria-current="page"{% endif %}>Организаторы</a>
       <a href="{% url 'guests:list' %}" {% if request.resolver_match.namespace == 'guests' %}aria-current="page"{% endif %}>Гости</a>
+      <a href="{% url 'events:search' %}" {% if request.resolver_match.url_name == 'search' %}aria-current="page"{% endif %}>Поиск по дате</a>
+      <a href="{% url 'events:available' %}" {% if request.resolver_match.url_name == 'available' %}aria-current="page"{% endif %}>Свободные гости</a>
+      <a href="{% url 'invitations:statistics' %}" {% if request.resolver_match.url_name == 'statistics' %}aria-current="page"{% endif %}>Статистика</a>
     </nav>
   </div>
 </header>

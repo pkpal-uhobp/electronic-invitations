@@ -1,11 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">СПИСОК ГОСТЕЙ</span><h1>Приглашения</h1><p class="muted">Все отправленные приглашения и их статусы.</p></div><span class="count-chip">Всего: {{ invitations|length }}</span></div>
+<div class="page-heading"><div><span class="eyebrow">СПИСОК ГОСТЕЙ · SQLite</span><h1>Приглашения</h1><p class="muted">Отправленные приглашения, статусы и ответы гостей.</p></div><span class="count-chip">Найдено: {{ invitations|length }}</span></div>
+<form method="get" action="{% url 'invitations:list' %}" class="filter-panel">
+  <label for="status">Статус</label>
+  <select name="status" id="status"><option value="">Все приглашения</option><option value="active" {% if selected_status == 'active' %}selected{% endif %}>Активные</option><option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Отменённые</option></select>
+  <button type="submit" class="action action-primary">Применить</button>
+  <a href="{% url 'invitations:statistics' %}">Статистика →</a>
+</form>
 <div class="cards-grid">
 {% for invitation in invitations %}
   {% include 'invitations_web/includes/invitation_card.html' %}
 {% empty %}
-  <div class="empty-state">Приглашения пока отсутствуют.</div>
+  <div class="empty-state">Приглашения с выбранным статусом не найдены.</div>
 {% endfor %}
 </div>
 {% endblock %}

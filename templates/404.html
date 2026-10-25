@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block title %}404 — Страница не найдена{% endblock %}
+{% block content %}
+{% include 'errors/error_panel.html' with code='404' heading='Страница не найдена' detail='Возможно, адрес изменился или запрошенное событие либо приглашение отсутствует.' only %}
+{% endblock %}
