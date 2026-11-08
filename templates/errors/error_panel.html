@@ -1,12 +1,1 @@
-<div class="error-layout">
-  <section class="error-panel" aria-labelledby="error-title">
-    <span class="eyebrow">ЭЛЕКТРОННЫЕ ПРИГЛАШЕНИЯ · ОШИБКА</span>
-    <div class="error-code" aria-hidden="true">{{ code }}</div>
-    <h1 id="error-title">{{ heading }}</h1>
-    <p>{{ detail }}</p>
-    <div class="error-links">
-      <a class="action action-primary" href="{% url 'homepage:index' %}">На главную</a>
-      <a class="action action-outline" href="{% url 'events:list' %}">К событиям</a>
-    </div>
-  </section>
-</div>
+<div class="error-layout"><section class="error-panel" aria-labelledby="error-title"><span class="eyebrow">ЭЛЕКТРОННЫЕ ПРИГЛАШЕНИЯ · ОШИБКА</span><div class="error-code" aria-hidden="true">{{ code }}</div><h1 id="error-title">{{ heading }}</h1><p>{{ detail }}</p><div class="error-links"><a class="action action-primary" href="{% url 'homepage:index' %}">На главную</a><a class="action action-outline" href="{% url 'events:list' %}">К событиям</a></div></section></div>

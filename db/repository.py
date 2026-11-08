@@ -1,7 +1,4 @@
-"""Адаптация sqlite3.Row в прежние предметные модели для Django-шаблонов ПР6.
-
-SQL остаётся в sql/queries.sql; старые Python-модели и консольный JSON-код не меняются.
-"""
+"""Legacy PR7 sqlite3.Row adapter; preserved but not imported by PR9 Django views."""
 from models import Event, Guest, Invitation, User
 from . import queries
 

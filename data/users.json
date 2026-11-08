@@ -1,12 +1,4 @@
 [
-  {
-    "id": "1",
-    "name": "Алексей Организатор",
-    "email": "alexey@example.com"
-  },
-  {
-    "id": "2",
-    "name": "Елена Организатор",
-    "email": "elena@example.com"
-  }
+  {"id": "1", "name": "Алексей Организатор", "email": "alexey@example.com"},
+  {"id": "2", "name": "Елена Организатор", "email": "elena@example.com"}
 ]

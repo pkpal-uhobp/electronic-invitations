@@ -1,123 +1,153 @@
-# Электронные приглашения — ПР6 + ПР7
+# Электронные приглашения — ПР9: модели Django и ORM
 
-Продолжение сквозного учебного проекта: [pkpal-uhobp/electronic-invitations](https://github.com/pkpal-uhobp/electronic-invitations).
+Продолжение [сквозного проекта](https://github.com/pkpal-uhobp/electronic-invitations) ПР1–ПР7. В ПР9 веб-слой переведён с `sqlite3` и ручных SQL-запросов на Django ORM без замены предметной области и пользовательских сценариев.
 
-## Назначение
+## Что изменилось в ПР9
 
-Просмотр событий, организаторов, гостей, электронных приглашений, ответов и статусов. Предметные Python-модели `User`, `Guest`, `Event`, `Invitation` и консольная версия проекта сохранены.
+- Созданы четыре модели Django: `users_web.User`, `guests_web.Guest`, `events_web.Event`, `invitations_web.Invitation`.
+- Настроены `ForeignKey`, `related_name`, `on_delete` (`SET_NULL`/`CASCADE`), nullable FK, `DateField`, значения по умолчанию и `choices`.
+- Добавлены начальные миграции во все четыре приложения. Структура **целевой** базы формируется `migrate`.
+- Добавлена идемпотентная management-команда `import_pr7` для переноса из `data/invitations.sqlite` в Django `db.sqlite3` с сохранением ключей и связей. Исходная база остаётся неизменённой.
+- Переписаны `views.py` всех пяти приложений: `Model.objects` вместо импорта `db.queries`/`db.repository`.
+- Реализованы ORM-фильтры, `exclude`, `Q`, поиск по нескольким полям, белый список полей сортировки, `values`, `aggregate`, `annotate`, `Count`, `select_related` и `Paginator`.
+- Сохранены страницы ПР6–ПР7: события, гости, организаторы, приглашения, подробности, поиск по дате, доступные гости, статистика и обработчики 400/403/404/500.
+- Для приглашений добавлены поиск, фильтр по событию, сортировка, исключение отменённых и навигация с сохранением параметров запроса между страницами.
+- Предыдущие консольные Python-модели в `models/`, JSON-хранилище, файлы `sql/`, `db/database.py`, `db/repository.py`, `db/queries.py` остаются как историческая реализация ПР1–ПР7. Они **не используются Django-представлениями ПР9**.
+- Добавлены `tests/test_pr9_orm.py`, старые консольные и SQL smoke-тесты.
 
-## ПР6: Django Templates
+## Быстрый запуск (Windows)
 
-- Общий шаблон `templates/base.html`, блоки `{% block %}` и наследование `{% extends %}`.
-- Подключаемые компоненты: навигация, карточки событий и приглашений, статус приглашения.
-- View-функции вызывают `render()` и передают данные в контекст.
-- Именованные маршруты с пространствами имён: `homepage`, `events`, `invitations`, `users`, `guests`.
-- Условия, циклы и фильтры `length`, `date`, `default` в шаблонах.
-- Собственные CSS, JavaScript и PNG-логотип подключены через `{% static %}`.
-- Кастомные шаблоны ошибок HTTP 400, 403, 404, 500 — с правильными кодами ответа. В Django они автоматически используются при `DEBUG=False`.
-
-## ПР7: SQLite + SQL (без Django ORM)
-
-**Предметная БД:** `data/invitations.sqlite`. Django сохраняет собственную служебную БД `db.sqlite3` для auth/admin — она не является частью SQL-задания.
-
-| Таблица | Поля | Связи |
-| --- | --- | --- |
-| `users` | `id INTEGER PRIMARY KEY`, `name TEXT`, `email TEXT` | организаторы |
-| `guests` | `id INTEGER PRIMARY KEY`, `name TEXT`, `email TEXT` | гости |
-| `events` | `id INTEGER PRIMARY KEY`, `name TEXT`, `date TEXT`, `user_id INTEGER` | `user_id → users.id`, допускает NULL |
-| `invitations` | `id INTEGER PRIMARY KEY`, `event_id INTEGER`, `guest_id INTEGER`, `guest_name TEXT`, `response TEXT`, `status TEXT` | `event_id → events.id`, `guest_id → guests.id` |
-
-Схема создаётся из `sql/schema.sql`. В `db/database.py` используются `sqlite3.connect()`, `PRAGMA foreign_keys=ON` и `sqlite3.Row`. В `db/import_json.py` реализован импорт через `executemany()` с параметрами `?` и транзакцией `commit` (контекстный менеджер соединения). Повторный запуск импорта безопасен: синхронизирует предметные таблицы с исходными JSON, не создавая дубликаты. **Импорт перезаписывает четыре предметные таблицы**, поэтому изменения, внесённые непосредственно в SQLite, до повторного импорта нужно сохранить отдельно.
-
-В `sql/queries.sql` находятся **19 именованных SQL-запросов**, все читаются из Django через `db/queries.py`:
-
-- `SELECT`: `users_list`, `guests_list`, `events_list`, `invitations_list`;
-- `WHERE`: `event_by_id`, `invitation_by_id`, `user_by_id`, `guest_by_id`, `events_on_date`, `invitations_by_status`, `invitations_for_guest`, `events_for_user`;
-- `JOIN`: `events_list`, `invitations_list`, `event_by_id`, `invitation_by_id` и другие;
-- агрегаты `COUNT`, `SUM`: `total_counts`, `invitation_totals`;
-- `GROUP BY`: `invitations_by_event`, `invitations_by_response`, `organizer_event_counts`, `popular_events` (с `HAVING`).
-
-Запросы с пользовательским вводом всегда параметризованы. SQL выполняется в `sqlite3`, а результат передаётся в Django через контекст `render()`; ORM предметной области не используется. JSON-файлы и консольные команды из предыдущих практических **сохранены**.
-
-## Установка и запуск (Windows PowerShell)
-
-Из корня проекта, где находится `manage.py`:
+Дважды щёлкните `RUN_WINDOWS.bat`, **или** в PowerShell из папки с `manage.py`:
 
 ```powershell
 py -m venv .venv
 .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m db.import_json
 python manage.py migrate
+python manage.py import_pr7
 python manage.py check
 python manage.py runserver
 ```
 
-Для Linux/macOS используйте `python3 -m venv .venv` и `source .venv/bin/activate`.
+Приложение: http://127.0.0.1:8000/
 
-База `data/invitations.sqlite` прилагается с примером исходных данных, однако команду `python -m db.import_json` рекомендуется выполнить для гарантированной синхронизации с JSON. Для обновления данных после редактирования JSON снова запустите эту команду.
+По умолчанию включён режим разработки `DEBUG=True` для работы локальных CSS/JavaScript-файлов. Для проверки собственных страниц ошибок 400/403/404/500 установите `DJANGO_DEBUG=0` (при необходимости разрешите `localhost`/`127.0.0.1` через `DJANGO_ALLOWED_HOSTS`).
 
-## URL-страницы
+**Порядок важен:** сначала `migrate`, потом `import_pr7`. Команда `python -m db.import_json` требуется только для изменения / восстановления *исходной базы ПР7* на основе JSON. Она перезаписывает старые предметные таблицы и **не должна заменять** `import_pr7`.
 
-| Адрес | Назначение | Источник данных |
+Аналогично для Linux/macOS: `python3 -m venv .venv`, `source .venv/bin/activate`.
+
+## Базы данных и перенос
+
+| Путь | Назначение |
+| --- | --- |
+| `data/invitations.sqlite` | Исходная SQLite ПР7 (4 таблицы: `users`, `guests`, `events`, `invitations`) |
+| `db.sqlite3` | Целевая БД Django с миграциями и моделями ORM (не входит в архив) |
+
+Команда `python manage.py import_pr7 [--source /путь/к/старой.sqlite]` сначала читает источник только для чтения через `sqlite3`, затем в `transaction.atomic()` записывает объекты **исключительно через ORM**, в порядке `User` → `Guest` → `Event` → `Invitation`. Используется `update_or_create(pk=...)`. Повторный импорт не дублирует данные; существующие записи с теми же ID синхронизируются с источником, не удаляя записи, которые были добавлены только в Django. Перед импортом реальных данных сделайте резервную копию обеих баз.
+
+Контрольные количества для вложенных демонстрационных данных: **2 организатора, 3 гостя, 2 события, 3 приглашения**. `event.date` из TEXT преобразуется в `date`.
+
+## Схема моделей
+
+| Модель | Поля | Обратная связь |
 | --- | --- | --- |
-| `/` | Главная и сводные показатели | SQLite `total_counts` |
-| `/events/`, `/events/1/` | События и детали | SQLite + JOIN |
-| `/events/search/?date=2026-12-28` | Поиск событий по дате | SQL `WHERE` |
-| `/events/available/?event_id=1` | Гости, у которых ещё нет активного приглашения | `NOT EXISTS`, параметризованный SQL |
-| `/invitations/`, `/invitations/1/` | Приглашения и детали | SQLite + JOIN |
-| `/invitations/?status=active` | Фильтрация приглашений | SQL `WHERE` |
-| `/invitations/statistics/` | Число приглашений, ответы, статистика по событиям и организаторам | `COUNT`, `SUM`, `GROUP BY`, `HAVING` |
-| `/users/`, `/users/1/` | Организаторы и их события | SQLite + JOIN |
-| `/guests/`, `/guests/1/` | Гости и их приглашения | SQLite + JOIN |
+| `users_web.User` | `name`, `email` | `user.events` |
+| `guests_web.Guest` | `name`, `email` | `guest.invitations` |
+| `events_web.Event` | `name`, `date`, `user` (`SET_NULL`, nullable) | `event.invitations` |
+| `invitations_web.Invitation` | `event` (`CASCADE`), `guest` (`SET_NULL`, nullable), `guest_name`, `response`, `status` | — |
 
-### Страницы ошибок
+`users_web.User` — предметная модель *организатора*, не `django.contrib.auth.User`.
 
-В `inviteweb/urls.py` назначены `handler400`, `handler403`, `handler404`, `handler500`. Используются отдельные шаблоны `templates/400.html`, `403.html`, `404.html`, `500.html` и общий компонент `templates/errors/error_panel.html`.
+## Адреса страниц
 
-Для проверки 404 в рабочем режиме отключите отладку:
+- `/` — общие счётчики из ORM.
+- `/events/`, `/events/<id>/` — события и детали; `q` и `sort` (дата, название, организатор).
+- `/events/search/?date=2026-12-28` — поиск по дате (`filter(date=...)`).
+- `/events/available/?event_id=1` — гости без **активного** приглашения на событие (подзапрос и `exclude`).
+- `/invitations/`, `/invitations/<id>/` — приглашения и детали.
+- `/invitations/?status=active&event_id=1&q=Анна&sort=date&page=1` — фильтры + многострочный поиск + безопасная сортировка + пагинация.
+- `/invitations/?hide_cancelled=1` — демонстрация `exclude`.
+- `/invitations/statistics/` — `aggregate`, `annotate`, `values`, `Count`; **включает события без приглашений и организаторов без событий**.
+- `/users/`, `/users/<id>/` — организаторы и их связанные события.
+- `/guests/`, `/guests/<id>/` — гости и их связанные приглашения.
 
-```powershell
-$env:DJANGO_DEBUG='0'
-$env:DJANGO_ALLOWED_HOSTS='127.0.0.1,localhost,testserver'
-python manage.py runserver
+Некорректные параметры дат/ID обрабатываются сообщениями, несуществующие объекты — 404, отсутствующие данные — пустыми состояниями в шаблонах. Поля сортировки сопоставлены со строгим белым списком.
+
+## 15+ различных ORM-выражений из практической работы
+
+Ниже перечислены **различные реально применяемые** выражения, а не 15 вызовов методов в одной цепочке:
+
+| № | Где применяется | Пример ORM |
+| ---: | --- | --- |
+| 1 | Организаторы | `User.objects.all().order_by('name', 'pk')` |
+| 2 | Гости | `Guest.objects.all().order_by('name', 'pk')` |
+| 3 | События + организатор | `Event.objects.select_related('user')` |
+| 4 | Поиск событий по названию / организатору | `Event.objects.filter(Q(name__icontains=q) \| Q(user__name__icontains=q))` |
+| 5 | Детали события | `Event.objects.select_related('user').get(pk=...)` через `get_object_or_404` |
+| 6 | События по дате | `Event.objects.filter(date=selected)` |
+| 7 | Подзапрос активных приглашений | `Invitation.objects.filter(event_id=..., status='active').values('guest_id')` |
+| 8 | Свободные гости | `Guest.objects.exclude(pk__in=invited_ids)` |
+| 9 | Приглашения + связи | `Invitation.objects.select_related('event', 'guest', 'event__user')` |
+| 10 | Приглашения по статусу | `Invitation.objects.filter(status=...)` |
+| 11 | Исключение отменённых | `Invitation.objects.exclude(status='cancelled')` |
+| 12 | Поиск по гостю / событию / почте | `Invitation.objects.filter(Q(...) \| Q(...) \| Q(...))` |
+| 13 | Приглашения выбранного события | `Invitation.objects.filter(event_id=...)` |
+| 14 | События организатора | `Event.objects.filter(user=user).select_related('user')` |
+| 15 | Приглашения гостя | `Invitation.objects.filter(guest=guest).select_related(...)` |
+| 16 | Сводка | `Invitation.objects.aggregate(total=Count('pk'), active=Count(...), ...)` |
+| 17 | Статистика по событиям | `Event.objects.annotate(invitation_count=Count('invitations'), ...)` |
+| 18 | Группировка по ответам | `Invitation.objects.values('response').annotate(invitation_count=Count('pk'))` |
+| 19 | События по организаторам | `User.objects.annotate(event_count=Count('events'))` |
+| 20 | Популярные события | `Event.objects.annotate(...).filter(invitation_count__gte=2)` |
+
+Дополнительно есть сортировки по одному и нескольким полям (`order_by`) и отдельная пагинация `Paginator`. Создание, изменение, удаление и обратные связи демонстрируются в тестах `tests/test_pr9_orm.py` и Django Shell.
+
+Пример Django Shell:
+
+```python
+from datetime import date
+from events_web.models import Event
+from guests_web.models import Guest
+from invitations_web.models import Invitation
+from users_web.models import User
+
+organizer = User.objects.create(name='Тестовый организатор', email='test@example.com')
+event = Event.objects.create(name='Тестовое мероприятие', date=date(2027, 1, 1), user=organizer)
+guest = Guest.objects.create(name='Тестовый гость', email='guest@example.com')
+invite = Invitation.objects.create(event=event, guest=guest, guest_name=guest.name)
+invite.set_response('да')
+invite.cancel()
+print(organizer.events.all(), guest.invitations.all())
+invite.delete()
+event.delete()
+guest.delete()
+organizer.delete()
 ```
 
-Откройте, например, `http://127.0.0.1:8000/events/999/` или `http://127.0.0.1:8000/no-such-page/`. Остальные обработчики проверяются тестами; публичные маршруты для искусственного вызова серверных ошибок не добавляются.
-
-## Проверки
+## Контрольные команды
 
 ```powershell
 python manage.py check
-pytest -q
+python manage.py makemigrations --check --dry-run
+python manage.py showmigrations
+python manage.py test
+pytest -v
 flake8 . --extend-exclude=venv,.venv
 ```
 
-SQL-запросы вручную можно выполнить в SQLite CLI: `sqlite3 data/invitations.sqlite`, затем `.read sql/queries.sql`. **Обратите внимание:** именованные запросы с `?` требуют передачи параметра в Python; их удобнее проверять через автотесты или выполнить вручную с конкретным значением.
+`pytest-django` в `requirements.txt` нужен для использования изолированной тестовой базы. Прежние тесты ПР7/консольной версии также доступны.
 
-## Структура нового слоя
+## Контрольная точка Git (нужно выполнить в локальном клоне)
 
-```text
-db/
-  __init__.py
-  database.py              # sqlite3 + sqlite3.Row + PRAGMA
-  import_json.py            # импорт JSON → SQLite
-  queries.py                # читает именованные SQL из SQL-файла
-  repository.py             # адаптирует sqlite3.Row для старых шаблонов
-sql/
-  schema.sql                # 4 таблицы + индексы + FK
-  queries.sql               # 19 SQL-запросов
-data/
-  invitations.sqlite        # готовая предметная база
-  events.json, users.json, guests.json, invitations.json # исходный ПР6
-inviteweb/error_views.py   # custom 400/403/404/500
-templates/400.html, 403.html, 404.html, 500.html
-templates/errors/error_panel.html
-events_web/templates/events_web/event_search.html
-events_web/templates/events_web/available_guests.html
-invitations_web/templates/invitations_web/statistics.html
-homepage/static/homepage/css/pr7.css
-tests/test_pr7_sql.py
+```powershell
+git switch -c pr9-django-orm
+git add .
+git commit -m "PR9: модели Django, миграции и перенос данных"
 ```
 
-ПР7 выполняется в **том же репозитории**; для тематических коммитов используйте префикс `PR7:`. Для внесения изменений в GitHub нужна роль с правом Push в репозиторий.
+Здесь предоставлен ZIP-каталог исходников, поэтому сам по себе архив **не содержит Git-истории и не создаёт коммит в GitHub**. При переносе в локальный клон сохраняйте собственный `.git`, копируйте файлы поверх клона и делайте осмысленные тематические коммиты с префиксом `PR9:`.
+
+## Требования, не выполняемые автоматически
+
+Прохождение 12 учебных тем Яндекс Практикума, демонстрация преподавателю и заполнение личных реквизитов отчёта являются самостоятельными действиями. Для них включены `docs/PR9_CHECKLIST.md` и `docs/PR9_REPORT_TEMPLATE.md`.

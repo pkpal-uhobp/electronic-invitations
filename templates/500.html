@@ -1,5 +1,3 @@
 {% extends 'base.html' %}
 {% block title %}500 — Ошибка сервера{% endblock %}
-{% block content %}
-{% include 'errors/error_panel.html' with code='500' heading='Что-то пошло не так' detail='Возникла внутренняя ошибка сервера. Попробуйте вернуться на главную страницу.' only %}
-{% endblock %}
+{% block content %}{% include 'errors/error_panel.html' with code='500' heading='Что-то пошло не так' detail='Возникла внутренняя ошибка сервера. Попробуйте вернуться на главную страницу.' only %}{% endblock %}

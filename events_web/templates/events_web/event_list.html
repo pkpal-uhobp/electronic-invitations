@@ -1,11 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">КАЛЕНДАРЬ СОБЫТИЙ</span><h1>События</h1><p class="muted">Просматривайте запланированные мероприятия и организаторов.</p></div><span class="count-chip">Всего: {{ events|length }}</span></div>
-<div class="cards-grid">
-{% for event in events %}
-  {% include 'events_web/includes/event_card.html' %}
-{% empty %}
-  <div class="empty-state">Пока нет событий. Данные можно добавить в <code>data/events.json</code>.</div>
-{% endfor %}
-</div>
+<div class="page-heading"><div><span class="eyebrow">КАЛЕНДАРЬ СОБЫТИЙ · ORM</span><h1>События</h1><p class="muted">Поиск и сортировка по событиям и организаторам.</p></div><span class="count-chip">Всего: {{ events|length }}</span></div>
+<form method="get" class="filter-panel"><label for="events-q">Поиск</label><input id="events-q" name="q" type="search" value="{{ query }}" placeholder="Событие или организатор">
+<label for="events-sort">Сортировка</label><select name="sort" id="events-sort">
+<option value="date" {% if selected_sort == 'date' %}selected{% endif %}>Дата ↑</option><option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Дата ↓</option><option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Название</option><option value="organizer" {% if selected_sort == 'organizer' %}selected{% endif %}>Организатор</option></select>
+<button class="action action-primary" type="submit">Применить</button><a href="{% url 'events:list' %}">Сбросить</a></form>
+<div class="cards-grid">{% for event in events %}{% include 'events_web/includes/event_card.html' %}{% empty %}<div class="empty-state">События не найдены.</div>{% endfor %}</div>
 {% endblock %}

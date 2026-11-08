@@ -1,12 +1,11 @@
-"""ПР7: идемпотентный импорт JSON-данных ПР1–ПР6 в отдельную базу SQLite.
+"""Original PR7: sync legacy JSON data to a separate SQLite database.
 
-Запуск: python -m db.import_json
-Дополнительно: python -m db.import_json --database path/to/test.sqlite
+Only for the PR7 source database, NOT the Django ORM database.
+Run: python -m db.import_json [--database PATH]
 """
 import argparse
 import json
 from pathlib import Path
-
 from .database import DB_PATH, ROOT_DIR, get_connection, initialize_database
 
 
@@ -19,14 +18,12 @@ def read_list(path):
 
 
 def import_json(data_dir=None, db_path=None):
-    """Пересоздать предметные записи в транзакции. Исходные JSON-файлы не изменяются."""
     data_dir = Path(data_dir) if data_dir is not None else ROOT_DIR / 'data'
     db_path = Path(db_path) if db_path is not None else DB_PATH
     users = read_list(data_dir / 'users.json')
     guests = read_list(data_dir / 'guests.json')
     events = read_list(data_dir / 'events.json')
     invitations = read_list(data_dir / 'invitations.json')
-
     db_path.parent.mkdir(parents=True, exist_ok=True)
     connection = get_connection(db_path)
     try:
@@ -39,31 +36,23 @@ def import_json(data_dir=None, db_path=None):
                 connection.execute(statement)
             connection.executemany(
                 'INSERT INTO users(id, name, email) VALUES (?, ?, ?)',
-                [(int(u['id']), u['name'], u['email']) for u in users],
-            )
+                [(int(u['id']), u['name'], u['email']) for u in users])
             connection.executemany(
                 'INSERT INTO guests(id, name, email) VALUES (?, ?, ?)',
-                [(int(g['id']), g['name'], g['email']) for g in guests],
-            )
+                [(int(g['id']), g['name'], g['email']) for g in guests])
             connection.executemany(
                 'INSERT INTO events(id, name, date, user_id) VALUES (?, ?, ?, ?)',
-                [(
-                    int(event['id']), event['name'], event['date'],
-                    int(event['user_id']) if event.get('user_id') is not None
-                    and int(event['user_id']) in user_ids else None,
-                ) for event in events],
-            )
+                [(int(e['id']), e['name'], e['date'],
+                  int(e['user_id']) if e.get('user_id') is not None
+                  and int(e['user_id']) in user_ids else None) for e in events])
             connection.executemany(
                 '''INSERT INTO invitations(id, event_id, guest_id, guest_name, response, status)
                    VALUES (?, ?, ?, ?, ?, ?)''',
-                [(
-                    int(invitation['id']), int(invitation['event_id']),
-                    int(invitation['guest_id']) if invitation.get('guest_id') is not None
-                    and int(invitation['guest_id']) in guest_ids else None,
-                    invitation.get('guest_name') or 'Неизвестный гость',
-                    invitation.get('response', 'не знаю'), invitation.get('status', 'active'),
-                ) for invitation in invitations],
-            )
+                [(int(i['id']), int(i['event_id']),
+                  int(i['guest_id']) if i.get('guest_id') is not None
+                  and int(i['guest_id']) in guest_ids else None,
+                  i.get('guest_name') or 'Неизвестный гость',
+                  i.get('response', 'не знаю'), i.get('status', 'active')) for i in invitations])
         return dict(users=len(users), guests=len(guests), events=len(events),
                     invitations=len(invitations))
     finally:

@@ -1,20 +1,20 @@
-"""ПР7: организаторы и их мероприятия из SQL."""
-from django.http import Http404
-from django.shortcuts import render
-from db import queries, repository
+"""Organizers and their related events via Django ORM."""
+from django.shortcuts import get_object_or_404, render
+
+from .models import User
+from events_web.models import Event
 
 
 def users(request):
+    result = User.objects.all().order_by('name', 'pk')
     return render(request, 'users_web/user_list.html', {
-        'page_title': 'Организаторы', 'users': repository.users(),
+        'page_title': 'Организаторы', 'users': result,
     })
 
 
 def user_detail(request, user_id: int):
-    row = queries.one('user_by_id', (user_id,))
-    if row is None:
-        raise Http404('Организатор не найден')
+    user = get_object_or_404(User, pk=user_id)
+    events = Event.objects.filter(user=user).select_related('user').order_by('date', 'pk')
     return render(request, 'users_web/user_detail.html', {
-        'page_title': row['name'], 'user': repository.user_from_row(row),
-        'events': repository.events('events_for_user', (user_id,)),
+        'page_title': user.name, 'user': user, 'events': events,
     })

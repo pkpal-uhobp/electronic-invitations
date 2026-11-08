@@ -2,24 +2,13 @@
 {% block title %}Свободные гости — Электронные приглашения{% endblock %}
 {% block content %}
 <a class="back-link" href="{% url 'events:list' %}">← События</a>
-<div class="page-heading"><div><span class="eyebrow">ПР7 · SQL NOT EXISTS</span><h1>Кого ещё можно пригласить?</h1><p class="muted">Показываем гостей без активного приглашения на выбранное событие.</p></div></div>
-<form method="get" action="{% url 'events:available' %}" class="filter-panel">
-  <label for="selected-event">Событие</label>
-  <select id="selected-event" name="event_id" required>
-    <option value="">Выберите событие</option>
-    {% for event in events %}<option value="{{ event.id }}" {% if event.id == selected_id|stringformat:'s' %}selected{% endif %}>{{ event.name }} · {{ event.date }}</option>{% endfor %}
-  </select>
-  <button class="action action-primary" type="submit">Показать гостей</button>
-</form>
+<div class="page-heading"><div><span class="eyebrow">ПР9 · ORM SUBQUERY / EXCLUDE</span><h1>Кого ещё можно пригласить?</h1><p class="muted">Гости без активного приглашения на выбранное событие.</p></div></div>
+<form method="get" action="{% url 'events:available' %}" class="filter-panel"><label for="selected-event">Событие</label>
+<select id="selected-event" name="event_id" required><option value="">Выберите событие</option>
+{% for event in events %}<option value="{{ event.id }}" {% if event.id|stringformat:'s' == selected_id %}selected{% endif %}>{{ event.name }} · {{ event.date|date:'d.m.Y' }}</option>{% endfor %}
+</select><button class="action action-primary" type="submit">Показать гостей</button></form>
 {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
-{% if searched %}
-<h2 class="section-title">Свободных гостей: {{ available|length }}</h2>
-<div class="cards-grid">
-{% for guest in available %}
-  <article class="entry-card"><span class="tag tag-purple">Гость №{{ guest.id }}</span><h2>{{ guest.name }}</h2><p class="muted">{{ guest.email }}</p><a class="card-link" href="{% url 'guests:detail' guest.id %}">Подробнее →</a></article>
-{% empty %}
-  <div class="empty-state">Все гости уже имеют активные приглашения на это событие.</div>
-{% endfor %}
-</div>
-{% endif %}
+{% if searched %}<h2 class="section-title">Свободных гостей: {{ available|length }}</h2><div class="cards-grid">
+{% for guest in available %}<article class="entry-card"><span class="tag tag-purple">Гость №{{ guest.id }}</span><h2>{{ guest.name }}</h2><p class="muted">{{ guest.email }}</p><a class="card-link" href="{% url 'guests:detail' guest.id %}">Подробнее →</a></article>
+{% empty %}<div class="empty-state">Все гости уже имеют активные приглашения на это событие.</div>{% endfor %}</div>{% endif %}
 {% endblock %}

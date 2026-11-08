@@ -1,5 +1,6 @@
 from datetime import date
 
+
 def input_int(prompt: str, minimum: int | None = None) -> int:
     while True:
         try:
@@ -9,6 +10,7 @@ def input_int(prompt: str, minimum: int | None = None) -> int:
             return value
         except ValueError:
             print('Введите корректное целое число.')
+
 
 def input_date(prompt: str) -> date:
     while True:

@@ -1,11 +1,13 @@
-"""ПР7: сводка из отдельной SQLite-базы, отображаемая шаблоном ПР6."""
+"""Homepage counts from Django ORM, not sqlite3."""
 from django.shortcuts import render
-from db import queries
+
+from events_web.models import Event
+from guests_web.models import Guest
+from invitations_web.models import Invitation
+from users_web.models import User
 
 
 def index(request):
-    totals = queries.one('total_counts')
-    return render(request, 'homepage/index.html', {
-        'page_title': 'Главная',
-        'stats': {key: totals[key] for key in ('events', 'invitations', 'users', 'guests')},
-    })
+    stats = {'events': Event.objects.count(), 'invitations': Invitation.objects.count(),
+             'users': User.objects.count(), 'guests': Guest.objects.count()}
+    return render(request, 'homepage/index.html', {'page_title': 'Главная', 'stats': stats})

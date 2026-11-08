@@ -1,10 +1,12 @@
-"""Настройки учебного Django-проекта «Электронные приглашения», ПР6."""
+"""Django project settings (PR9: Django ORM)."""
 import os
 from pathlib import Path
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-electronic-invitations-local-development-only')
-DEBUG = False
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'testserver']
+DEBUG = os.environ.get('DJANGO_DEBUG', '0').lower() in ('1', 'true', 'yes')
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get(
+    'DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost,testserver').split(',') if host.strip()]
 INSTALLED_APPS = [
     'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes',
     'django.contrib.sessions', 'django.contrib.messages', 'django.contrib.staticfiles',
@@ -22,8 +24,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'inviteweb.urls'
 TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': [BASE_DIR / 'templates'],
-    'APP_DIRS': True,
+    'DIRS': [BASE_DIR / 'templates'], 'APP_DIRS': True,
     'OPTIONS': {'context_processors': [
         'django.template.context_processors.debug',
         'django.template.context_processors.request',
@@ -34,7 +35,7 @@ TEMPLATES = [{
 WSGI_APPLICATION = 'inviteweb.wsgi.application'
 ASGI_APPLICATION = 'inviteweb.asgi.application'
 DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': BASE_DIR / 'db.sqlite3'}}
-AUTH_PASSWORD_VALIDATORS = []  # локальный учебный проект
+AUTH_PASSWORD_VALIDATORS = []  # Local educational project only
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True

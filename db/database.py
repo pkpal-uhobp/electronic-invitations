@@ -1,4 +1,4 @@
-"""Подключение и схема предметной SQLite базы (Django Auth использует db.sqlite3)."""
+"""Legacy PR7 sqlite3 access: retained for historical tests and JSON import only."""
 import sqlite3
 from pathlib import Path
 
@@ -8,7 +8,6 @@ SCHEMA_PATH = ROOT_DIR / 'sql' / 'schema.sql'
 
 
 def get_connection(path=None):
-    """Создать соединение с включенными внешними ключами и именованными строками."""
     actual_path = Path(path) if path is not None else DB_PATH
     connection = sqlite3.connect(actual_path)
     connection.row_factory = sqlite3.Row
@@ -17,5 +16,4 @@ def get_connection(path=None):
 
 
 def initialize_database(connection):
-    """Создать схему, не удаляя существующие данные."""
     connection.executescript(SCHEMA_PATH.read_text(encoding='utf-8'))

@@ -1,1 +1,1 @@
-# Данные предметной области остаются в JSON; Django ORM-модели в ПР6 не нужны.
+"""Homepage displays data from existing domain models; no separate table needed."""

@@ -1,17 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">СПИСОК ГОСТЕЙ · SQLite</span><h1>Приглашения</h1><p class="muted">Отправленные приглашения, статусы и ответы гостей.</p></div><span class="count-chip">Найдено: {{ invitations|length }}</span></div>
+<div class="page-heading"><div><span class="eyebrow">СПИСОК ГОСТЕЙ · DJANGO ORM</span><h1>Приглашения</h1><p class="muted">Поиск, фильтры, сортировка и постраничный вывод.</p></div><span class="count-chip">Найдено: {{ page_obj.paginator.count }}</span></div>
 <form method="get" action="{% url 'invitations:list' %}" class="filter-panel">
-  <label for="status">Статус</label>
-  <select name="status" id="status"><option value="">Все приглашения</option><option value="active" {% if selected_status == 'active' %}selected{% endif %}>Активные</option><option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Отменённые</option></select>
-  <button type="submit" class="action action-primary">Применить</button>
-  <a href="{% url 'invitations:statistics' %}">Статистика →</a>
+<div class="filter-field"><label for="invite-q">Поиск</label><input type="search" name="q" id="invite-q" value="{{ query }}" placeholder="Гость, email, событие"></div>
+<div class="filter-field"><label for="status">Статус</label><select name="status" id="status"><option value="">Все приглашения</option><option value="active" {% if selected_status == 'active' %}selected{% endif %}>Активные</option><option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Отменённые</option></select></div>
+<div class="filter-field"><label for="event-id">Событие</label><select name="event_id" id="event-id"><option value="">Все события</option>{% for event in events %}<option value="{{ event.id }}" {% if event.id|stringformat:'s' == selected_event %}selected{% endif %}>{{ event.name }}</option>{% endfor %}</select></div>
+<div class="filter-field"><label for="sort">Сортировка</label><select name="sort" id="sort"><option value="id" {% if selected_sort == 'id' %}selected{% endif %}>По номеру</option><option value="date" {% if selected_sort == 'date' %}selected{% endif %}>Дата события ↑</option><option value="date_desc" {% if selected_sort == 'date_desc' %}selected{% endif %}>Дата события ↓</option><option value="guest" {% if selected_sort == 'guest' %}selected{% endif %}>Имя гостя</option><option value="event" {% if selected_sort == 'event' %}selected{% endif %}>Название события</option><option value="status" {% if selected_sort == 'status' %}selected{% endif %}>Статус</option></select></div>
+<label class="check-filter"><input type="checkbox" name="hide_cancelled" value="1" {% if hide_cancelled %}checked{% endif %}> Скрыть отменённые</label>
+<button type="submit" class="action action-primary">Применить</button><a href="{% url 'invitations:list' %}">Сбросить</a><a href="{% url 'invitations:statistics' %}">Статистика →</a>
 </form>
-<div class="cards-grid">
-{% for invitation in invitations %}
-  {% include 'invitations_web/includes/invitation_card.html' %}
-{% empty %}
-  <div class="empty-state">Приглашения с выбранным статусом не найдены.</div>
-{% endfor %}
-</div>
+{% for error in errors %}<p role="alert" class="form-error">{{ error }}</p>{% endfor %}
+<div class="cards-grid">{% for invitation in invitations %}{% include 'invitations_web/includes/invitation_card.html' %}{% empty %}<div class="empty-state">Приглашения по выбранным параметрам не найдены.</div>{% endfor %}</div>
+{% if page_obj.paginator.num_pages > 1 %}<nav class="pagination-panel" aria-label="Страницы приглашений">
+{% if page_obj.has_previous %}<a class="action action-outline" href="{% querystring page=page_obj.previous_page_number %}">← Назад</a>{% endif %}
+{% for number in page_obj.paginator.page_range %}<a href="{% querystring page=number %}" class="page-number {% if number == page_obj.number %}page-number-active{% endif %}" {% if number == page_obj.number %}aria-current="page"{% endif %}>{{ number }}</a>{% endfor %}
+{% if page_obj.has_next %}<a class="action action-outline" href="{% querystring page=page_obj.next_page_number %}">Вперёд →</a>{% endif %}
+</nav>{% endif %}
 {% endblock %}

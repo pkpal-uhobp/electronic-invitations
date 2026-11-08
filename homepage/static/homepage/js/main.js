@@ -1,4 +1,4 @@
-// Маленький интерактивный компонент ПР6: актуальный год и мобильная навигация.
+// Existing PR6 mobile navigation and current-year footer.
 const yearElement = document.getElementById('current-year');
 if (yearElement) yearElement.textContent = new Date().getFullYear();
 const toggle = document.getElementById('nav-toggle');

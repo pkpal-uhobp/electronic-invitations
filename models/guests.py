@@ -1,4 +1,4 @@
-"""Гость (предметная модель)."""
+"""Original console guest model."""
 class Guest:
     def __init__(self, guest_id: str, name: str, email: str):
         self.id = str(guest_id)
@@ -7,7 +7,7 @@ class Guest:
 
     @classmethod
     def from_data(cls, data: dict):
-        return cls(str(data["id"]), data["name"], data["email"])
+        return cls(str(data['id']), data['name'], data['email'])
 
     def __str__(self):
-        return f"{self.name} <{self.email}>"
+        return f'{self.name} <{self.email}>'

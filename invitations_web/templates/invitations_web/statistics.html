@@ -1,28 +1,18 @@
 {% extends 'base.html' %}
 {% block title %}Статистика — Электронные приглашения{% endblock %}
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">ПР7 · SQL COUNT / GROUP BY / HAVING</span><h1>Статистика приглашений</h1><p class="muted">Данные получены запросами SQLite, без Django ORM.</p></div></div>
+<div class="page-heading"><div><span class="eyebrow">ПР9 · ORM AGGREGATE / ANNOTATE / VALUES</span><h1>Статистика приглашений</h1><p class="muted">Показатели из Django ORM без ручных SQL-запросов.</p></div></div>
 <section class="stats-grid" aria-label="Общая статистика">
-  <div class="stat-card"><span class="stat-number">{{ totals.total }}</span><span class="stat-label">Всего</span></div>
-  <div class="stat-card"><span class="stat-number">{{ totals.active }}</span><span class="stat-label">Активных</span></div>
-  <div class="stat-card"><span class="stat-number">{{ totals.cancelled }}</span><span class="stat-label">Отменено</span></div>
-  <div class="stat-card"><span class="stat-number">{{ totals.yes_count }}</span><span class="stat-label">Ответили «Да»</span></div>
-</section>
-<section><h2 class="section-title">Приглашения по событиям</h2>
-<div class="table-wrap"><table class="table table-striped stats-table"><thead><tr><th>Событие</th><th>Всего</th><th>Активных</th></tr></thead><tbody>
-{% for row in by_event %}<tr><td><a href="{% url 'events:detail' row.id %}">{{ row.name }}</a></td><td>{{ row.invitation_count }}</td><td>{{ row.active_count }}</td></tr>
-{% empty %}<tr><td colspan="3">Нет данных.</td></tr>{% endfor %}
-</tbody></table></div></section>
-<section><h2 class="section-title">Ответы гостей</h2>
-<div class="table-wrap"><table class="table table-striped stats-table"><thead><tr><th>Ответ</th><th>Количество</th></tr></thead><tbody>
-{% for row in by_response %}<tr><td>{{ row.response }}</td><td>{{ row.invitation_count }}</td></tr>{% empty %}<tr><td colspan="2">Нет данных.</td></tr>{% endfor %}
-</tbody></table></div></section>
-<section><h2 class="section-title">События организаторов</h2>
-<div class="table-wrap"><table class="table table-striped stats-table"><thead><tr><th>Организатор</th><th>Событий</th></tr></thead><tbody>
-{% for row in by_organizer %}<tr><td><a href="{% url 'users:detail' row.id %}">{{ row.name }}</a></td><td>{{ row.event_count }}</td></tr>{% empty %}<tr><td colspan="2">Нет данных.</td></tr>{% endfor %}
-</tbody></table></div></section>
-<section><h2 class="section-title">Популярные события (2+ приглашения)</h2>
-<div class="table-wrap"><table class="table table-striped stats-table"><thead><tr><th>Событие</th><th>Приглашений</th></tr></thead><tbody>
-{% for row in popular %}<tr><td>{{ row.name }}</td><td>{{ row.invitation_count }}</td></tr>{% empty %}<tr><td colspan="2">Пока нет таких событий.</td></tr>{% endfor %}
-</tbody></table></div></section>
+<div class="stat-card"><span class="stat-number">{{ totals.total }}</span><span class="stat-label">Всего</span></div>
+<div class="stat-card"><span class="stat-number">{{ totals.active }}</span><span class="stat-label">Активных</span></div>
+<div class="stat-card"><span class="stat-number">{{ totals.cancelled }}</span><span class="stat-label">Отменено</span></div>
+<div class="stat-card"><span class="stat-number">{{ totals.yes_count }}</span><span class="stat-label">Ответили «Да»</span></div></section>
+<section><h2 class="section-title">Приглашения по событиям</h2><div class="table-wrap"><table class="table table-striped stats-table"><thead><tr><th>Событие</th><th>Всего</th><th>Активных</th></tr></thead><tbody>
+{% for row in by_event %}<tr><td><a href="{% url 'events:detail' row.id %}">{{ row.name }}</a></td><td>{{ row.invitation_count }}</td><td>{{ row.active_count }}</td></tr>{% empty %}<tr><td colspan="3">Нет данных.</td></tr>{% endfor %}</tbody></table></div></section>
+<section><h2 class="section-title">Ответы гостей</h2><div class="table-wrap"><table class="table table-striped stats-table"><thead><tr><th>Ответ</th><th>Количество</th></tr></thead><tbody>
+{% for row in by_response %}<tr><td>{{ row.response }}</td><td>{{ row.invitation_count }}</td></tr>{% empty %}<tr><td colspan="2">Нет данных.</td></tr>{% endfor %}</tbody></table></div></section>
+<section><h2 class="section-title">События организаторов</h2><div class="table-wrap"><table class="table table-striped stats-table"><thead><tr><th>Организатор</th><th>Событий</th></tr></thead><tbody>
+{% for row in by_organizer %}<tr><td><a href="{% url 'users:detail' row.id %}">{{ row.name }}</a></td><td>{{ row.event_count }}</td></tr>{% empty %}<tr><td colspan="2">Нет данных.</td></tr>{% endfor %}</tbody></table></div></section>
+<section><h2 class="section-title">Популярные события (2+ приглашения)</h2><div class="table-wrap"><table class="table table-striped stats-table"><thead><tr><th>Событие</th><th>Приглашений</th></tr></thead><tbody>
+{% for row in popular %}<tr><td><a href="{% url 'events:detail' row.id %}">{{ row.name }}</a></td><td>{{ row.invitation_count }}</td></tr>{% empty %}<tr><td colspan="2">Пока нет таких событий.</td></tr>{% endfor %}</tbody></table></div></section>
 {% endblock %}

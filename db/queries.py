@@ -1,4 +1,4 @@
-"""Параметризованные SQL-запросы из sql/queries.sql для Django-представлений."""
+"""Legacy PR7 named SQL catalog; PR9 web views must not import it."""
 import re
 from contextlib import closing
 from functools import lru_cache

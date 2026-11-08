@@ -1,1 +1,8 @@
-"""Админ-настройки будут добавлены после перехода на Django ORM."""
+from django.contrib import admin
+from .models import User
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'email')
+    search_fields = ('name', 'email')

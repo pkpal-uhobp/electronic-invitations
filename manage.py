@@ -1,15 +1,9 @@
 #!/usr/bin/env python
-"""Django management script."""
+"""Django management commands for Electronic Invitations."""
 import os
 import sys
 
-def main():
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inviteweb.settings')
-    try:
-        from django.core.management import execute_from_command_line
-    except ImportError as exc:
-        raise ImportError('Сначала установите зависимости: pip install -r requirements.txt') from exc
-    execute_from_command_line(sys.argv)
-
 if __name__ == '__main__':
-    main()
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inviteweb.settings')
+    from django.core.management import execute_from_command_line
+    execute_from_command_line(sys.argv)
