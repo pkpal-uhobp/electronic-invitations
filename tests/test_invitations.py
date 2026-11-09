@@ -1,5 +1,6 @@
 import pytest
-from invitations import add_invitation, cancel_invitation, invitation_statistics, is_invitation_available, set_response
+from invitations import (add_invitation, cancel_invitation, invitation_statistics,
+                         is_invitation_available, set_response)
 
 
 def test_add_invitation_blocks_duplicate_active_invitation():

@@ -10,6 +10,12 @@ urlpatterns = [
     path('users/', include('users_web.urls')),
     path('guests/', include('guests_web.urls')),
 ]
+
+from django.conf import settings
+
+if settings.DEBUG:
+    urlpatterns += [path('__debug__/', include('debug_toolbar.urls'))]
+
 handler400 = 'inviteweb.error_views.bad_request'
 handler403 = 'inviteweb.error_views.permission_denied'
 handler404 = 'inviteweb.error_views.page_not_found'

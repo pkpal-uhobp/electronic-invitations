@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Главная — Электронные приглашения{% endblock %}
 {% block content %}
-<section class="hero"><span class="eyebrow">УЧЕБНЫЙ DJANGO-ПРОЕКТ · ПРАКТИЧЕСКАЯ РАБОТА №9</span>
+<section class="hero"><span class="eyebrow">УЧЕБНЫЙ DJANGO-ПРОЕКТ · ПРАКТИЧЕСКАЯ РАБОТА №10</span>
 <h1>Ваши события.<br><em>Ваши приглашения.</em></h1>
 <p class="hero-description">Организуйте события, просматривайте приглашения и отслеживайте ответы гостей. Все страницы используют Django ORM.</p>
 <div class="hero-actions"><a class="action action-primary" href="{% url 'events:list' %}">Посмотреть события <span aria-hidden="true">↗</span></a><a class="action action-outline" href="{% url 'invitations:list' %}">Все приглашения</a></div></section>
@@ -10,6 +10,6 @@
 <a class="stat-card" href="{% url 'invitations:list' %}"><span class="stat-number">{{ stats.invitations }}</span><span class="stat-label">Приглашения</span></a>
 <a class="stat-card" href="{% url 'users:list' %}"><span class="stat-number">{{ stats.users }}</span><span class="stat-label">Организаторы</span></a>
 <a class="stat-card" href="{% url 'guests:list' %}"><span class="stat-number">{{ stats.guests }}</span><span class="stat-label">Гости</span></a></section>
-<section class="info-panel"><div><h2>Как это устроено</h2><p>В ПР6 созданы Django-шаблоны, в ПР7 — отдельная база SQLite и SQL. В ПР9 предметные данные перенесены в модели Django с ForeignKey, миграциями, QuerySet и ORM-агрегированием. Исходная консольная версия и SQL-файлы ПР7 сохранены.</p></div><span class="info-icon" aria-hidden="true">✉</span></section>
+<section class="info-panel"><div><h2>Как это устроено</h2><p>В ПР6 созданы Django-шаблоны, в ПР7 — отдельная база SQLite и SQL. В ПР9 данные перенесены в Django ORM; в ПР10 добавлены русскоязычная админ-панель, человекочитаемые адреса событий, вычисляемые поля и инструменты анализа SQL. Исходная консольная версия и SQL-файлы ПР7 сохранены.</p></div><span class="info-icon" aria-hidden="true">✉</span></section>
 <div class="hero-actions"><a class="action action-outline" href="{% url 'events:search' %}">Поиск по дате</a><a class="action action-outline" href="{% url 'events:available' %}">Неприглашённые гости</a><a class="action action-outline" href="{% url 'invitations:statistics' %}">Статистика ORM</a></div>
 {% endblock %}

@@ -1,6 +1,6 @@
 """PR9: ORM search, filtering, safe ordering, relations, aggregates and pagination."""
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404, render
 
 from events_web.models import Event
@@ -15,7 +15,7 @@ SORTS = {
 
 def invitations(request):
     status = request.GET.get('status', '').strip()
-    if status not in (Invitation.STATUS_ACTIVE, Invitation.STATUS_CANCELLED):
+    if status not in Invitation.Status.values:
         status = ''
     query = request.GET.get('q', '').strip()[:100]
     raw_event_id = request.GET.get('event_id', '').strip()
@@ -58,15 +58,22 @@ def invitation_detail(request, invitation_id: int):
 
 
 def statistics(request):
-    totals = Invitation.objects.aggregate(
+    aggregates = Invitation.objects.aggregate(
         total=Count('pk'),
         active=Count('pk', filter=Q(status=Invitation.STATUS_ACTIVE)),
-        cancelled=Count('pk', filter=Q(status=Invitation.STATUS_CANCELLED)),
+        cancelled=Count('pk', filter=Q(status=Invitation.Status.CANCELLED)),
+        completed=Count('pk', filter=Q(status=Invitation.Status.COMPLETED)),
         yes_count=Count('pk', filter=Q(response=Invitation.RESPONSE_YES)),
     )
+    # Keep PR9 'totals' keys stable: old integration tests compare this dictionary.
+    totals = {key: value for key, value in aggregates.items() if key != 'completed'}
+    completed_count = aggregates['completed']
     by_event = Event.objects.annotate(
         invitation_count=Count('invitations'),
-        active_count=Count('invitations', filter=Q(invitations__status='active')),
+        active_count=Count('invitations', filter=Q(
+            invitations__status=Invitation.Status.ACTIVE)),
+        completed_count=Count('invitations', filter=Q(
+            invitations__status=Invitation.Status.COMPLETED)),
     ).order_by('-invitation_count', 'pk')
     by_response = Invitation.objects.values('response').annotate(
         invitation_count=Count('pk')).order_by('-invitation_count', 'response')
@@ -74,8 +81,14 @@ def statistics(request):
         '-event_count', 'pk')
     popular = Event.objects.annotate(invitation_count=Count('invitations')).filter(
         invitation_count__gte=2).order_by('-invitation_count', 'pk')
+    # F() + values() joins linked tables and returns dictionaries in one SQL query.
+    recent = Invitation.objects.annotate(
+        event_name=F('event__name'),
+        organizer_name=F('event__user__name'),
+    ).values('pk', 'guest_name', 'event_name', 'organizer_name', 'status').order_by('-pk')[:5]
     return render(request, 'invitations_web/statistics.html', {
         'page_title': 'Статистика приглашений', 'totals': totals,
         'by_event': by_event, 'by_response': by_response,
         'by_organizer': by_organizer, 'popular': popular,
+        'completed_count': completed_count, 'recent': recent,
     })

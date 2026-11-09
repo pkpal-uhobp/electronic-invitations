@@ -1,3 +1,3 @@
 <article class="entry-card event-card"><div class="card-top"><span class="tag tag-purple">Событие №{{ event.id }}</span><span class="date-label">{{ event.date|date:'d.m.Y' }}</span></div>
 <h2>{{ event.name|default:'Без названия' }}</h2><p class="muted">Организатор: {% if event.user %}<a href="{% url 'users:detail' event.user.id %}">{{ event.user.name }}</a>{% else %}не указан{% endif %}</p>
-<a class="card-link" href="{% url 'events:detail' event.id %}">Подробнее →</a></article>
+<a class="card-link" href="{{ event.get_absolute_url }}">Подробнее →</a></article>

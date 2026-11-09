@@ -4,7 +4,7 @@
 <button id="nav-toggle" class="nav-toggle" type="button" aria-label="Открыть меню" aria-controls="site-nav" aria-expanded="false">☰</button>
 <nav id="site-nav" class="site-nav" aria-label="Основная навигация">
 <a href="{% url 'homepage:index' %}" {% if request.resolver_match.namespace == 'homepage' %}aria-current="page"{% endif %}>Главная</a>
-<a href="{% url 'events:list' %}" {% if request.resolver_match.namespace == 'events' and request.resolver_match.url_name == 'list' %}aria-current="page"{% endif %}>События</a>
+<a href="{% url 'events:list' %}" {% if request.resolver_match.namespace == 'events' and request.resolver_match.url_name == 'list' %}aria-current="page"{% endif %}>События ({{ events_count }})</a>
 <a href="{% url 'invitations:list' %}" {% if request.resolver_match.namespace == 'invitations' and request.resolver_match.url_name == 'list' %}aria-current="page"{% endif %}>Приглашения</a>
 <a href="{% url 'users:list' %}" {% if request.resolver_match.namespace == 'users' %}aria-current="page"{% endif %}>Организаторы</a>
 <a href="{% url 'guests:list' %}" {% if request.resolver_match.namespace == 'guests' %}aria-current="page"{% endif %}>Гости</a>

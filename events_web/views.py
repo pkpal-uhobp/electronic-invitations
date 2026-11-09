@@ -32,6 +32,15 @@ def event_detail(request, event_id: int):
     })
 
 
+def event_detail_by_slug(request, slug: str):
+    """Preferred PR10 URL; the integer endpoint is kept for PR9 compatibility."""
+    event = get_object_or_404(Event.objects.select_related('user'), slug=slug)
+    return render(request, 'events_web/event_detail.html', {
+        'page_title': event.name, 'event': event, 'event_date': event.date,
+        'is_upcoming': event.date >= date.today(),
+    })
+
+
 def search_by_date(request):
     selected_date = request.GET.get('date', '').strip()
     found = Event.objects.none()

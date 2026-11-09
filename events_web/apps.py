@@ -4,3 +4,4 @@ from django.apps import AppConfig
 class EventsWebConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'events_web'
+    verbose_name = 'События'

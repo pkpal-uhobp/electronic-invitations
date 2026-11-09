@@ -3,8 +3,8 @@ from django.db import models
 
 
 class Guest(models.Model):
-    name = models.CharField(max_length=120)
-    email = models.EmailField(max_length=254)
+    name = models.CharField(max_length=120, verbose_name='Имя')
+    email = models.EmailField(max_length=254, verbose_name='Электронная почта')
 
     class Meta:
         ordering = ['name', 'pk']
